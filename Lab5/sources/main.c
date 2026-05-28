@@ -6,7 +6,7 @@
  * sends the voltage readings to the computer through a UART communication protocol
  * to visualize the output in the serial monitor
  *
- * @authors David Mijares, Ximena Cedillo, Xavier Clemente
+ * @authors David Mijares
  */
 
 #include <stdint.h>
@@ -73,3 +73,4 @@
     
     return 0;  // Never reached
 }
+

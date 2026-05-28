@@ -71,3 +71,4 @@ void uart_write(char c)
     // Write the 8 bit character to the data register for transmission
     USART2->DR = c; 
 }
+
