@@ -13,6 +13,8 @@ $(SRC_DIR)/sensor.c			\
 $(SRC_DIR)/serial.c			\
 $(SRC_DIR)/TIM.c			\
 $(SRC_DIR)/Timer.c			\
+$(SRC_DIR)/MPU6050.c		\
+$(SRC_DIR)/I2C.c			\
 $(SRC_DIR)/STM32_startup.c 	\
 $(SRC_DIR)/system_stm32f4xx.c
 

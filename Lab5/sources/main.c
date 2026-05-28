@@ -6,11 +6,11 @@
  * sends the voltage readings to the computer through a UART communication protocol
  * to visualize the output in the serial monitor
  *
- * @authors David Mijares
+ * @authors David Mijares, Ximena Cedillo, Xavier Clemente
  */
 
 #include <stdint.h>
-#include "Sensor.h"
+#include "MPU6050.h"
 #include "serial.h"
 #include "Timer.h"
 
@@ -20,16 +20,13 @@
 #define PIN_RX 3                                            // Rx pin number
 #define ALTERNATE_FUNCTION_MODE 2                           // ALternate function mode value
 
-// ADC Global Constants
-#define ADC_CHANNEL 0                                       // ADC channel for potentiometer (PA0)
-#define ADC_GPIOx A                                         // PWM's GPIO that will be implemented in the main
-#define ADC_PIN     0
-#define ANALOG_MODE 3
-#define ADC_MAX_VALUE 4095                                  // Maximum ADC value for 12-bit resolution
-#define ADC_TO_PERCENT(adc) ((adc * 100) / ADC_MAX_VALUE)   // Macro for conversion
+// MPU6050 Global Constants
+#define I2C_GPIOx B                                         // GPIOB for I2C1
+#define PIN_SCL 8                                           // PB8 -> I2C1_SCL
+#define PIN_SDA 9                                           // PB9 -> I2C1_SDA
+#define I2C_ALTERNATE_FUNCTION_MODE 2                       // Alternate Function mode
 
-// Conversion Mode Selection
-#define CONTINUOUS_CONVERSION_MODE 1                        // Use continuous mode for real-time control
+
 
 // Timer Global Constants
 #define TIMx TIM_2                                          // Timer used for delay
@@ -45,35 +42,34 @@
  * 
  * @return int Always returns 0 (the infinite loop is never exited)
  */
-int main(void)
+
+ int main(void)
 { 
-    uint32_t adc_value = 0; // Raw ADC reading (0-4095)
-    uint32_t voltage = 0; 
+
+    MPU6050_t sensor; 
 
     // Serial 
     serial_init(SERIAL_GPIOx, PIN_TX, PIN_RX, ALTERNATE_FUNCTION_MODE); 
   
-    
-    
-    // ADC sensor
-    sensor_init(ADC_CHANNEL, ADC_GPIOx, ADC_PIN, ANALOG_MODE); // Initialize sensor (ADC) on the specified channel
-    sensor_startConversion(ADC_CHANNEL, CONTINUOUS_CONVERSION_MODE); // Start continuous conversions for real-time control
+    mpu6050_init(I2C_GPIOx, PIN_SCL, PIN_SDA, I2C_ALTERNATE_FUNCTION_MODE);
+
+    timer_delay_ms(TIMx, 100);
 
     // Timer
     timer_init(TIMx); // Initialize Timer
 
+
+
     // Infinite loop - real-time control
     while (1)
     {
-
-        // Read the current potentiometer value (0-4095)
-        adc_value = sensor_readValue();
+        serial_printf("Inicio\r\n");
+        // Read MPU6050 data
+        mpu6050_readData(&sensor);
+        // Send data through UART
+        serial_printf("AX:%d AY:%d AZ:%d | GX:%d GY:%d GZ:%d\r\n", sensor.ax, sensor.ay, sensor.az, sensor.gx, sensor.gy, sensor.gz);
         timer_delay_ms(TIMx, DELAY_500_MS); // Delay for 500ms
-        voltage = (adc_value * 3300) / ADC_MAX_VALUE; 
-        serial_printf("ADC Value: %d | Voltage: %d mV\n", adc_value, voltage); 
-
     }
     
     return 0;  // Never reached
 }
-
